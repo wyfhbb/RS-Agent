@@ -316,14 +316,15 @@ The Knowledge Space uses DualRAG, implemented as a modified LightRAG fork. See [
 ## Citation
 
 ```bibtex
-@article{rsagent,
-  author = "Xu Wenjia,Yu Zijian,Mu Boyang,Wang Jiuniu,Wei Zhiwei,Peng MuGen",
-  title = "RS-Agent: Automating Remote Sensing Tasks through Intelligent Agent",
-  journal = "SCIENCE CHINA Information Sciences",
-  year = "2026",
-  pages = "-",
-  url = "http://www.sciengine.com/publisher/Science China Press/journal/SCIENCE CHINA Information Sciences///10.1007/s11432-026-5026-5",
-  doi = "https://doi.org/10.1007/s11432-026-5026-5"
+@article{RS-Agent,
+  author  = {Xu, Wenjia and Yu, Zijian and Mu, Boyang and Wang, Jiuniu and Wei, Zhiwei and Peng, Mugen},
+  title   = {RS-Agent: Automating Remote Sensing Tasks through Intelligent Agent},
+  journal = {SCIENCE CHINA Information Sciences},
+  year    = {2026},
+  volume  = {69},
+  number  = {8},
+  pages   = {180302},
+  doi     = {10.1007/s11432-026-5026-5}
 }
 ```
 
