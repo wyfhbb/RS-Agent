@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,32 +7,41 @@ name = "rs-agent"
 version = "0.1.0"
 description = "RS-Agent: Automating Remote Sensing Tasks through Intelligent Agent"
 readme = "README.md"
-requires-python = ">=3.9"
-license = {text = "Apache-2.0"}
+requires-python = ">=3.12"
+license = "Apache-2.0"
 authors = [
     {name = "RS-Agent Team"},
 ]
 dependencies = [
-    "langchain>=0.3.0,<0.4.0",
-    "langchain-community>=0.3.0",
-    "langchain-core>=0.3.0",
-    "langchain-openai>=0.2.0",
-    "langchain-huggingface>=0.1.0",
-    "langchain-text-splitters>=0.3.0",
-    "langchainhub>=0.1.0",
-    "openai>=1.0.0",
-    "huggingface-hub>=0.20.0",
-    "sentence-transformers>=2.2.0",
-    "faiss-cpu>=1.7.4",
-    "numpy>=1.24.0",
+    # Classic retains the structured-chat executor and benchmark result format.
+    "langchain-classic>=1.0.8,<2",
+    "langchain-community>=0.4.2,<0.5",
+    "langchain-core>=1.6.3,<2",
+    "langchain-openai>=1.6.2,<2",
+    "langchain-huggingface>=1.2.2,<2",
+    "langchain-text-splitters>=1.1.2,<2",
+    "openai>=2,<4",
+    "huggingface-hub>=1,<2",
+    "sentence-transformers>=5,<7",
+    "faiss-cpu>=1.12,<2",
+    "numpy>=2,<3",
+    "torch>=2.10,<3",
     "python-dotenv>=1.0.0",
     "pyyaml>=6.0",
     "tqdm>=4.65.0",
-    "pydantic>=2.0.0",
+    "pydantic>=2.0.0,<3",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=7.0", "ruff>=0.1.0"]
+dualrag = ["lightrag-hku"]
+web = ["lightrag-hku[api]"]
+
+[dependency-groups]
+dev = ["pytest>=9,<10", "ruff>=0.15,<1"]
+
+[tool.uv.sources]
+# Use the modified fork in this checkout, never the unrelated PyPI release.
+lightrag-hku = { path = "dualrag", editable = true }
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -40,7 +49,10 @@ include = ["rs_agent*"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py39"
+target-version = "py312"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "W"]

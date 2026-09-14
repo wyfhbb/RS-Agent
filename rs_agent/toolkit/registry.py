@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from langchain.tools import Tool
+from langchain_core.tools import Tool
 
 from rs_agent.toolkit.stubs import STUB_TOOLS, _stub
 

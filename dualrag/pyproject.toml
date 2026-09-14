@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[tool.uv]
+# setup.py reads these files to determine package metadata and dependencies.
+cache-keys = [
+    { file = "pyproject.toml" },
+    { file = "setup.py" },
+    { file = "requirements.txt" },
+    { file = "lightrag/__init__.py" },
+    { file = "lightrag/api/requirements.txt" },
+    { file = "lightrag/tools/lightrag_visualizer/requirements.txt" },
+]

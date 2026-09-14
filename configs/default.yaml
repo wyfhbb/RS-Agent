@@ -2,7 +2,7 @@
 
 llm:
   provider: openai          # openai | ollama
-  model: gpt-4o-mini
+  model: gpt-5.5
   temperature: 0
 
 embedding:

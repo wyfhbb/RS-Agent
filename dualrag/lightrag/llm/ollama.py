@@ -5,15 +5,6 @@ if sys.version_info < (3, 9):
 else:
     from collections.abc import AsyncIterator
 
-import pipmaster as pm  # Pipmaster for dynamic library install
-
-# install specific modules
-if not pm.is_installed("ollama"):
-    pm.install("ollama")
-if not pm.is_installed("tenacity"):
-    pm.install("tenacity")
-
-
 import ollama
 
 from tenacity import (

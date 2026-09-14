@@ -109,12 +109,29 @@ To evaluate RS-Agent's adaptability, we evaluate its task planning accuracy when
 ```bash
 git clone https://github.com/IntelliSensing/RS-Agent.git
 cd RS-Agent
-python -m venv .venv && source .venv/bin/activate   # optional
-pip install -r requirements.txt
-pip install -e .                                    # install rs_agent package
-export PYTHONPATH=.
+# Install uv first: https://docs.astral.sh/uv/getting-started/installation/
+uv python install
+uv sync --locked
+uv run --locked pytest
 ```
 
+Python is pinned in `.python-version`; `uv.lock` fixes the full dependency graph.
+`uv sync` creates `.venv` and installs this checkout in editable mode, including
+the development tools. No activation or `PYTHONPATH` override is needed.
+Use `uv sync --locked --no-dev` for a runtime-only installation, and add
+`--no-dev` to subsequent `uv run` commands as well.
+
+The bundled DualRAG fork is optional and shares the same lockfile:
+
+```bash
+uv sync --locked --extra dualrag
+uv run --locked --extra dualrag pytest
+```
+
+The Linux PyTorch build includes CUDA libraries. Embeddings still default to CPU;
+set `EMBEDDING_DEVICE=cuda` in `.env` to use a compatible NVIDIA GPU.
+See [环境复现说明（中文）](docs/environment.zh-CN.md) for verification, NixOS/WSL
+setup, and dependency updates.
 
 
 ### 2. Configuration
@@ -142,10 +159,10 @@ Pre-built FAISS indices are shipped under `data/indices/`. Rebuild if you change
 
 ```bash
 # RS-Agent (18 tools)
-python scripts/build_solution_index.py
+uv run --locked scripts/build_solution_index.py
 
 # RS-ChatGPT baseline (7 tools)
-python scripts/build_solution_index.py \
+uv run --locked scripts/build_solution_index.py \
   --source data/solutions/guidance_rschatgpt.txt \
   --output data/indices/solution_db_rschatgpt
 ```
@@ -155,7 +172,7 @@ python scripts/build_solution_index.py \
 ### 4. Run Demo
 
 ```bash
-python examples/demo.py \
+uv run --locked examples/demo.py \
     --question "Can you upscale this image to a higher resolution?"
 ```
 
@@ -168,7 +185,7 @@ Before running the code, please keep the following in mind:
 - **API Key required**: `examples/demo.py` and `benchmarks/planning/run_eval.py` call an LLM backend. Copy `.env.example` to `.env` and set `OPENAI_API_KEY` (and `OPENAI_API_BASE` if needed).
 - **Network on first run**: Solution Space retrieval downloads `moka-ai/m3e-base` from HuggingFace, and the agent pulls the LangChain hub prompt — both require internet access.
 - **Stub tools by default**: Tools in `rs_agent/toolkit/stubs.py` return placeholder outputs for **task planning evaluation** only. For real remote sensing inference, install the upstream models listed in the [Toolkit](#toolkit) section.
-- **LangChain version**: Use `langchain>=0.3,<0.4` as pinned in `requirements.txt`. Newer LangChain releases may break imports such as `from langchain.tools import Tool`.
+- **LangChain compatibility**: The controller uses `langchain-classic` 1.x to retain the structured-chat execution and benchmark output format. Tools, text splitters, and HuggingFace embeddings use their maintained packages, following the [official migration guide](https://docs.langchain.com/oss/python/migrate/langchain-v1). Use `uv.lock` to reproduce the tested versions.
 - **DualRAG reproduction**: Full Knowledge Space experiments need Ollama or an OpenAI-compatible API, plus a built index over the `mix` corpus. Follow `dualrag/reproduce/Step_1.py`–`Step_3.py` (see [dualrag/DUALRAG.md](dualrag/DUALRAG.md)).
 
 
@@ -182,11 +199,11 @@ Before running the code, please keep the following in mind:
 
 | Component          | Default Model          | Notes                                        |
 | ------------------ | ---------------------- | -------------------------------------------- |
-| Central Controller | `gpt-4o-mini`          | Any OpenAI-compatible API supported          |
+| Central Controller | `gpt-5.5`              | Any OpenAI-compatible API supported          |
 | Paper default      | `Qwen2.5-32B-Instruct` | Also validated with ChatGPT, LLaMA, DeepSeek |
 
 
-Configure via `configs/default.yaml` or `.env`.
+Configure the LLM model in `configs/default.yaml` and API credentials in `.env`.
 
 ### Retrieval Models
 

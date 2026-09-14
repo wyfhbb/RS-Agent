@@ -14,34 +14,50 @@ Compared to the original LightRAG baseline (`LightRAG_old` in the research works
 ## Installation
 
 ```bash
+# From the RS-Agent repository root
+uv sync --locked --extra dualrag
+uv run --locked --extra dualrag pytest tests/test_dualrag_runtime.py
 cd dualrag
-pip install -e .
 ```
+
+Commands below run from `dualrag/` and explicitly select the parent project.
+This installs the local modified `lightrag-hku` fork, using the root `uv.lock`.
+Default JSON, NanoVectorDB, and NetworkX storage dependencies are declared up
+front; default storage imports do not install packages at runtime.
+The optional node2vec method needs `graspologic`, which is outside this environment
+because its current release requires NumPy 1.x. The default RAG path does not use it.
 
 ## Evaluation Pipeline
 
 ```bash
 # 1. Prepare unique contexts from corpus
-python reproduce/Step_0.py
+uv run --project .. --locked --extra dualrag reproduce/Step_0.py
 
 # 2. Index documents into knowledge graph
-python reproduce/Step_1.py
+uv run --project .. --locked --extra dualrag reproduce/Step_1.py
 
 # 3. Generate evaluation questions (requires OPENAI_API_KEY)
-python reproduce/Step_2.py
+uv run --project .. --env-file ../.env --locked --extra dualrag reproduce/Step_2.py
 
 # 4. Run queries (local / global / hybrid modes)
-python reproduce/Step_3.py
-python reproduce/Step_3_local.py
-python reproduce/Step_3_global.py
+uv run --project .. --locked --extra dualrag reproduce/Step_3.py
+uv run --project .. --locked --extra dualrag reproduce/Step_3_local.py
+uv run --project .. --locked --extra dualrag reproduce/Step_3_global.py
 
-# 5. Compare DualRAG vs LightRAG baseline
-python datasets/eval.py
+# 5. Compare the local and hybrid outputs
+uv run --project .. --env-file ../.env --locked --extra dualrag datasets/eval.py
 ```
+
+Step_2 generates `mix_all_questions.txt`; the query and evaluation scripts currently
+read the bundled `mix_questions.txt`. Select the intended questions before running
+a newly generated evaluation set.
 
 ## Environment Variables
 
-Set in the project root `.env` or export directly:
+Copy the root `.env.example` to `.env` and fill in the API settings before Step_2
+or evaluation. These commands use `--env-file ../.env` because those scripts do
+not load dotenv themselves. Alternatively, export the variables and omit
+`--env-file ../.env`:
 
 ```bash
 export OPENAI_API_KEY=your-key

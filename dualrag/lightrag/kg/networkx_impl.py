@@ -7,16 +7,7 @@ from lightrag.types import KnowledgeGraph, KnowledgeGraphNode, KnowledgeGraphEdg
 from lightrag.utils import logger
 from lightrag.base import BaseGraphStorage
 
-import pipmaster as pm
-
-if not pm.is_installed("networkx"):
-    pm.install("networkx")
-
-if not pm.is_installed("graspologic"):
-    pm.install("graspologic")
-
 import networkx as nx
-from graspologic import embed
 from .shared_storage import (
     get_storage_lock,
     get_update_flag,
@@ -187,6 +178,14 @@ class NetworkXStorage(BaseGraphStorage):
 
     # TODO: NOT USED
     async def _node2vec_embed(self):
+        try:
+            from graspologic import embed
+        except ImportError as exc:
+            raise ImportError(
+                "Node2vec requires the optional 'graspologic' package in a compatible "
+                "environment. Normal DualRAG retrieval does not require this package."
+            ) from exc
+
         graph = await self._get_graph()
         embeddings, nodes = embed.node2vec_embed(
             graph,

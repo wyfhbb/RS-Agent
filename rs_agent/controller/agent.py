@@ -4,10 +4,10 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from langchain import hub
-from langchain.agents import AgentExecutor, create_structured_chat_agent
-from langchain.tools import Tool
+from langchain_classic import hub
+from langchain_classic.agents import AgentExecutor, create_structured_chat_agent
 from langchain_core.language_models.chat_models import BaseChatModel
+from langchain_core.tools import Tool
 from langchain_openai import ChatOpenAI
 
 from rs_agent.controller.prompts import TASK_TYPE_PROMPT, TASK_TYPE_PROMPT_RSCHATGPT
@@ -97,7 +97,7 @@ class RSAgent:
         """Stage 1: Task Inference."""
         prompt = self.task_type_prompt.format(question=question)
         response = self.llm.invoke(prompt)
-        return response.content.strip()
+        return response.text.strip()
 
     def retrieve_guidance(self, question: str, predicted_task_type: str | None) -> str | None:
         """Stage 1b: Solution Retrieval via Task-Aware Retrieval."""

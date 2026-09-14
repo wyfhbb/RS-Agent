@@ -1,21 +1,20 @@
 # DualRAG core runtime dependencies
-# Install: cd dualrag && pip install -e .
+# Install from the repository root: uv sync --extra dualrag
 
-aiohttp>=3.9.0
-configparser
-future
-gensim>=4.3.0
-networkx>=3.0
-numpy>=1.24.0
+aiohttp>=3.11.0,<4
+networkx>=3.4.0,<4
+nano-vectordb>=0.0.4.3,<0.1
+numpy>=2.0.0,<3
 pipmaster>=0.4.0
-pydantic>=2.0.0
-python-dotenv>=1.0.0
-setuptools
-tenacity>=8.0.0
-tiktoken>=0.5.0
+pydantic>=2.10.0,<3
+python-dotenv>=1.0.0,<2
+tenacity>=9.0.0,<10
+tiktoken>=0.8.0,<1
 
-# Used by reproduce/Step_2.py and OpenAI-compatible LLM backends
-openai>=1.0.0
+# Reproduction scripts and the default OpenAI / Ollama backends
+openai>=2.0.0,<4
+ollama>=0.6.2,<1
+transformers>=5,<6
 
 # Optional extras (install as needed)
 # API server: pip install -e ".[api]"
