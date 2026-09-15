@@ -178,12 +178,35 @@ uv run --locked examples/demo.py \
 
 By default this uses `examples/sample.png`. Override with `--image /path/to/your/image.png`.
 
+Add `--trace-dir outputs/trajectory-demo` to export the actual `intermediate_steps`
+as an offline HTML trajectory, SVG diagram, and complete JSON (including tool
+inputs, observations, and action logs). Backends that serve the Responses API
+can use `--responses-api`; `--user-agent RS-Agent/0.1` sets an application header
+when needed by a gateway. See [轨迹样例与复现（中文）](docs/intermediate-steps.zh-CN.md).
+
+### 5. Test Real Detection and Classification Models
+
+```bash
+uv sync --locked --extra vision
+uv run --locked --extra vision scripts/probe_detection.py
+uv run --locked --extra vision scripts/probe_classification.py
+uv run --locked --extra vision scripts/probe_horizontal_detection.py
+```
+
+These standalone probes run pretrained YOLOv8x-OBB (DOTA), public EuroSAT
+ResNet-18 / ViT-B/16 classifiers, and a torchvision Faster R-CNN (COCO) control.
+They do not require an LLM API key. First use downloads weights and sample data;
+JSON results and annotated images are saved under `outputs/model-smoke/`.
+The classifiers and horizontal detector are substitutes, and the Agent tools
+remain stubs. See [模型实测报告（中文）](docs/model-smoke-results.zh-CN.md)
+for actual results, limitations, and commands for your own images.
+
 ## Notes
 
 Before running the code, please keep the following in mind:
 
 - **API Key required**: `examples/demo.py` and `benchmarks/planning/run_eval.py` call an LLM backend. Copy `.env.example` to `.env` and set `OPENAI_API_KEY` (and `OPENAI_API_BASE` if needed).
-- **Network on first run**: Solution Space retrieval downloads `moka-ai/m3e-base` from HuggingFace, and the agent pulls the LangChain hub prompt — both require internet access.
+- **Network on first run**: Solution Space retrieval downloads `moka-ai/m3e-base` from HuggingFace. The structured-chat prompt is bundled locally in `rs_agent/controller/prompts.py`; no LangChain Hub download is needed.
 - **Stub tools by default**: Tools in `rs_agent/toolkit/stubs.py` return placeholder outputs for **task planning evaluation** only. For real remote sensing inference, install the upstream models listed in the [Toolkit](#toolkit) section.
 - **LangChain compatibility**: The controller uses `langchain-classic` 1.x to retain the structured-chat execution and benchmark output format. Tools, text splitters, and HuggingFace embeddings use their maintained packages, following the [official migration guide](https://docs.langchain.com/oss/python/migrate/langchain-v1). Use `uv.lock` to reproduce the tested versions.
 - **DualRAG reproduction**: Full Knowledge Space experiments need Ollama or an OpenAI-compatible API, plus a built index over the `mix` corpus. Follow `dualrag/reproduce/Step_1.py`–`Step_3.py` (see [dualrag/DUALRAG.md](dualrag/DUALRAG.md)).

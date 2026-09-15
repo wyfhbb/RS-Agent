@@ -2,6 +2,40 @@
 
 from __future__ import annotations
 
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+
+# Keep the structured-chat contract local so running the agent does not require
+# downloading and deserializing an unversioned public Hub prompt.
+STRUCTURED_CHAT_PROMPT = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            """Respond to the human as helpfully and accurately as possible.
+You have access to the following tools:
+
+{tools}
+
+Return exactly one JSON action at a time, inside a Markdown JSON code block.
+Valid "action" values are "Final Answer" or one of: {tool_names}.
+Use "action_input" for the tool input or the final response to the human.
+
+```json
+{{"action": "tool_name", "action_input": "tool input"}}
+```
+
+Wait for the actual tool observation before choosing the next action.
+Follow the user's requested operation order. Do not invent tool observations
+or output file paths. When finished, return:
+
+```json
+{{"action": "Final Answer", "action_input": "Final response to the human"}}
+```""",
+        ),
+        MessagesPlaceholder("chat_history", optional=True),
+        ("human", "{input}\n\n{agent_scratchpad}\n\nReturn one JSON action."),
+    ]
+)
+
 TASK_TYPES = [
     "Super_Resolution",
     "Denoising",

@@ -12,10 +12,8 @@ from langchain_core.language_models.fake_chat_models import (
     FakeMessagesListChatModel,
 )
 from langchain_core.messages import AIMessage
-from langchain_core.prompts import ChatPromptTemplate
 
 from benchmarks.planning.score import score_single_tool_prediction
-from rs_agent.controller import agent as agent_module
 from rs_agent.controller.agent import RSAgent
 from rs_agent.solution_space import builder, retriever
 from rs_agent.toolkit.registry import TASK_TO_TOOL, get_stub_tools
@@ -23,14 +21,7 @@ from rs_agent.toolkit.registry import TASK_TO_TOOL, get_stub_tools
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_structured_agent_preserves_tool_steps(monkeypatch):
-    prompt = ChatPromptTemplate.from_messages(
-        [
-            ("system", "Available tools: {tools}\nTool names: {tool_names}"),
-            ("human", "{input}\n{agent_scratchpad}"),
-        ]
-    )
-    monkeypatch.setattr(agent_module.hub, "pull", lambda *_args, **_kwargs: prompt)
+def test_structured_agent_preserves_tool_steps():
     llm = FakeListChatModel(
         responses=[
             '["Scene_Classification"]',

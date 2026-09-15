@@ -4,13 +4,16 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from langchain_classic import hub
 from langchain_classic.agents import AgentExecutor, create_structured_chat_agent
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.tools import Tool
 from langchain_openai import ChatOpenAI
 
-from rs_agent.controller.prompts import TASK_TYPE_PROMPT, TASK_TYPE_PROMPT_RSCHATGPT
+from rs_agent.controller.prompts import (
+    STRUCTURED_CHAT_PROMPT,
+    TASK_TYPE_PROMPT,
+    TASK_TYPE_PROMPT_RSCHATGPT,
+)
 from rs_agent.solution_space.retriever import SolutionRetriever
 
 AgentMode = Literal["full", "baseline", "task_inference_only", "solution_retrieval_only"]
@@ -62,6 +65,10 @@ class RSAgent:
             llm_kwargs["api_key"] = llm_cfg["api_key"]
         if llm_cfg.get("api_base"):
             llm_kwargs["base_url"] = llm_cfg["api_base"]
+        if "use_responses_api" in llm_cfg:
+            llm_kwargs["use_responses_api"] = llm_cfg["use_responses_api"]
+        if llm_cfg.get("default_headers"):
+            llm_kwargs["default_headers"] = llm_cfg["default_headers"]
 
         if not llm_kwargs.get("api_key"):
             raise ValueError(
@@ -125,7 +132,10 @@ class RSAgent:
         if self.mode == "task_inference_only" and predicted_task_type:
             return f"{base} The task type for this problem is most likely:{predicted_task_type}"
         if guidance:
-            return f"{base} The following content can offer you guidance to solve the question:{guidance}"
+            return (
+                f"{base} The following content can offer you guidance to solve the question:"
+                f"{guidance}"
+            )
         return base
 
     def run(self, question: str, image_path: str) -> dict[str, Any]:
@@ -142,8 +152,7 @@ class RSAgent:
 
         agent_input = self.build_input(question, image_path, guidance, predicted_task_type)
 
-        prompt = hub.pull("hwchase17/structured-chat-agent")
-        agent = create_structured_chat_agent(self.llm, self.tools, prompt)
+        agent = create_structured_chat_agent(self.llm, self.tools, STRUCTURED_CHAT_PROMPT)
         executor = AgentExecutor(
             agent=agent,
             tools=self.tools,

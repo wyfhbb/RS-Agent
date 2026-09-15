@@ -41,9 +41,9 @@ cp .env.example .env
 uv run --locked examples/demo.py --question "Can you upscale this image?"
 ```
 
-默认嵌入模型是 `moka-ai/m3e-base`，首次运行需要下载模型；Agent 还会联网读取
-LangChain Hub 的 structured-chat prompt。模型文件、Hub prompt、外部 LLM 服务
-不受 Python 锁文件控制。更换嵌入模型后，需重建索引：
+默认嵌入模型是 `moka-ai/m3e-base`，首次运行需要下载模型。Agent 使用仓库内
+`rs_agent/controller/prompts.py` 的固定 structured-chat 模板，不再联网读取 Hub。
+模型文件和外部 LLM 服务不受 Python 锁文件控制。更换嵌入模型后，需重建索引：
 
 ```bash
 uv run --locked scripts/build_solution_index.py
@@ -51,6 +51,21 @@ uv run --locked scripts/build_solution_index.py
 
 项目默认工具是用于规划评测的 stub。真实遥感模型的权重和各自的推理环境，
 以及 DualRAG 实验需要的数据、索引与外部服务，仍需按项目说明配置。
+
+## 真实目标检测与分类
+
+独立模型推理使用 `vision` 可选依赖：
+
+```bash
+uv sync --locked --extra vision
+uv run --locked --extra vision scripts/probe_detection.py
+uv run --locked --extra vision scripts/probe_classification.py
+```
+
+已实测 YOLOv8x-OBB、公开 EuroSAT ResNet-18/ViT-B/16，以及水平框 Faster R-CNN 控制实验。
+详细结果、适用范围和自己的图像用法见 [模型实测报告](model-smoke-results.zh-CN.md)。
+这些脚本直接加载权重，不需要 LLM API；Agent 中的原工具仍是 stub。
+若还需要 Web 依赖，可使用 `uv sync --locked --extra web --extra vision` 同时安装。
 
 ## DualRAG
 

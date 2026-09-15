@@ -35,6 +35,13 @@ dependencies = [
 [project.optional-dependencies]
 dualrag = ["lightrag-hku"]
 web = ["lightrag-hku[api]"]
+vision = [
+    "pillow>=12.3.0",
+    "pyarrow>=25.0.1",
+    "timm>=1.0.29",
+    "torchvision>=0.29.0",
+    "ultralytics-opencv-headless>=8.4.151",
+]
 
 [dependency-groups]
 dev = ["pytest>=9,<10", "ruff>=0.15,<1"]
