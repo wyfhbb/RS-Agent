@@ -54,6 +54,9 @@ lightrag-hku = { path = "dualrag", editable = true }
 where = ["."]
 include = ["rs_agent*"]
 
+[tool.setuptools.package-data]
+rs_agent = ["showcase.html", "detection_showcase.html"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py312"

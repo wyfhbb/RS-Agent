@@ -1,5 +1,63 @@
 # 运行样例并导出 intermediate_steps 轨迹
 
+## 三模型真实目标检测展示
+
+目标检测入口：`outputs/detection-showcase/index.html`，使用
+Cascade R-CNN + MSFA、GFL + MSFA 和 YOLO11s-HBB 的真实 SAR 权重。
+舰船、飞机、车辆、港口四张图，每张分别调用三个模型，共记录 12 次新的检测调用。
+完整长链保存在同目录 `trace.json`；页面按样例显示原图和三个模型的检测框、
+置信度、预测数量及对应工具观察，支持阈值过滤、放大查看和逐步回放。
+
+```bash
+uv run --no-sync examples/detection_showcase.py \
+  --responses-api --user-agent RS-Agent/0.1 \
+  --output outputs/detection-showcase-new
+```
+
+默认读取 `../midterm-exp/configs/agent_detectors.json`，三个视觉模型在各自隔离环境
+运行，并沿用共享 GPU 锁。Cascade/GFL 使用已有 SAR checkpoint；YOLO 使用本地
+微调完成 19 轮后的 best 权重。未向 Agent 提供 GT；不根据预测数量推断准确率。
+示例预先指定图像与模型顺序，并附基于真实工具事件的进度提示。
+
+```bash
+# 仅重新渲染实际记录，不调用 LLM 或视觉模型
+uv run --no-sync examples/detection_showcase.py --render-only
+```
+
+`detector_calls/` 保存逐次子进程日志、原始预测、标注图、模型审计和权重哈希。
+`validation.json` 核对模型/图像身份、checkpoint、真实推理标记和预测数量。
+
+## 多案例长流程展示
+
+运行四组明确指定操作顺序的长流程，覆盖仓库全部 18 种工具：
+
+```bash
+uv run --no-sync examples/trace_showcase.py --responses-api --user-agent RS-Agent/0.1
+```
+
+输出入口：`outputs/trajectory-showcase/index.html`。离线页面支持案例切换、
+节点详情、逐步播放、方向键导航、展示模式与全部案例打印 / PDF。
+机场、灾后、SAR、地表案例预期分别执行 9、7、6、8 次工具调用；
+实际步骤数和顺序检查以各目录 `trace.json` 为准。真实 LLM 和方案检索实际运行，
+工具仍是原始 stub，不能据此判断遥感推理效果，也不作为自主规划准确率评测。
+四个案例共用 `sample.png` 路径占位，不代表真实灾区或 SAR 输入。
+
+各案例保留完整 JSON、SVG、HTML 和模型请求 / 响应日志。
+已有 `trace.json` 会保留；用 `--output outputs/another-showcase` 采集新一组记录，
+用 `--case airport` 只采集单个案例。网关兼容选项与单案例 demo 相同；
+长流程脚本另设非流式请求、低 reasoning effort 和单次模型请求最多三次尝试，
+以应对本地网关的响应异常。每轮请求附加由已返回 Observation 计算的进度提示，
+明确下一项与结束条件；模型仍返回实际 action，工具真实执行原始 stub 函数。
+元数据记录这些演示辅助选项，不改动默认 Controller。
+
+仅重新渲染已有记录，无需模型和网络：
+
+```bash
+uv run --no-sync examples/trace_showcase.py --render-only
+```
+
+## 单案例运行
+
 在项目环境已安装、`.env` 已配置 API 凭据的情况下，在仓库根目录运行：
 
 ```bash
